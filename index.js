@@ -15,17 +15,12 @@ const app = express();
 dbConnection();
 
 //Middlewares
-app.use( cors() )
-
-
+app.use( cors() );
+app.use( express.json() );
 
 //Routes
-app.get('/', ( req, res ) => {
-    res.status(400).json({
-        ok: true,
-        msg: 'Hello World'
-    });
-});
+app.use('/api/users', require('./routes/users'))
+app.use('/api/auth', require('./routes/auth'))
 
 
 
