@@ -8,8 +8,18 @@ const { generateJWT } = require('../helpers/jwt');
 
 //Controllers
 const getUsers = async ( req = request, res = response ) => {
-    const users = await User.find({}, 'name email ');
-    res.json({ uid: req.uid, users });
+    const from = Number(req.query.from) || 0;
+    const limit = Number(req.query.limit) || 5;
+
+    const [ users, total ] = await Promise.all([
+        User.find({}, 'name email img')
+            .skip( from )
+            .limit( limit ),
+
+        User.countDocuments()
+    ]);
+                
+    res.json({ uid: req.uid, users, total });
 }
 
 const setUser = async ( req = request, res = response ) => {
