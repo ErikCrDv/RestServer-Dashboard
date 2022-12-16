@@ -1,9 +1,11 @@
 const { response } = require("express");
 const bcrypt = require('bcryptjs');
 
+const { generateJWT } = require("../helpers/jwt");
+const { googleVerify } = require("../helpers/google-verify");
+
 //Model
 const Users = require("../models/user");
-const { generateJWT } = require("../helpers/jwt");
 
 const login = async ( req, res = response ) => {
     const { email, password } = req.body;
@@ -36,6 +38,42 @@ const login = async ( req, res = response ) => {
     }
 }
 
+const googleLogin = async ( req, res = response ) => {
+    const { token } = req.body;
+
+    try {
+        const { name, email, picture } = await googleVerify( token );
+        const userDb = await Users.findOne({ email });
+
+        let user;
+        if( !userDb ){
+            user = new Users({
+                name, 
+                email, 
+                password: '~~~', 
+                img: picture,
+                google: true
+            })
+        }else{
+            user = userDb;
+            user.google = true;
+        }
+        // SAVE
+        await user.save();
+        // Generar JWT
+        const JWtoken = await generateJWT( user.id );
+        res.json({ JWtoken });
+        
+    } catch (error) {
+        console.log(error);
+        res.status(400).json({
+            msg: 'Error inesperado, TOKEN DE GOOGLE NO VALIDO, comunicarse con el administrador'
+        });
+    }
+
+}
+
 module.exports = {
-    login
+    login,
+    googleLogin
 }
