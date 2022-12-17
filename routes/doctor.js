@@ -12,6 +12,7 @@ const { validateFlieds } = require("../middlewares/validate-fields");
 const router = Router();
 
 router.get('/', [validateJWT], getDoctors);
+
 router.post('/', [
     validateJWT,
     check('name', 'Nombre es obligatorio').not().isEmpty(),
@@ -19,7 +20,15 @@ router.post('/', [
     check('hospital', 'No es un Id Valido').isMongoId(),
     validateFlieds
 ], setDoctor);
-router.put('/', [], updateDoctor);
-router.delete('/', [], deleteDoctor);
+
+router.put('/:id', [
+    validateJWT,
+    check('name', 'Nombre es obligatorio').not().isEmpty(),
+    check('hospital', 'Hospital es obligatorio').not().isEmpty(),
+    check('hospital', 'No es un Id Valido').isMongoId(),
+    validateFlieds
+], updateDoctor);
+
+router.delete('/:id', [ validateJWT ], deleteDoctor);
 
 module.exports = router;

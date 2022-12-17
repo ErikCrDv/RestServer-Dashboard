@@ -40,17 +40,53 @@ const setDoctor = async ( req =request, res = response ) => {
 }
 const updateDoctor = async ( req =request, res = response ) => {
 
-    res.json({
-        msg: 'updateDoctor'
-    });
+    const uid = req.uid;
+    const { id } = req.params;
+
+    try {
+        const doctor = await Doctor.findById( id );
+        if( !doctor ){
+            return res.status(404).json({
+                msg: 'No existe un doctor con el id ingresado'
+            });
+        }
+
+        const doctorFields = {
+            ...req.body,
+            user: uid
+        }
+        const doctorUpdate = await Doctor.findByIdAndUpdate( id, doctorFields, { new: true } );
+        res.json( doctorUpdate );
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            msg: 'Error inesperado, comuniquese con el administrador'
+        }) 
+    }
 
 }
+
 const deleteDoctor = async ( req =request, res = response ) => {
 
-    res.json({
-        msg: 'deleteDoctor'
-    });
+    const { id } = req.params;
+    try {
+        // User Exists ?
+        const doctor = await Doctor.findById( id );
+        if( !doctor ){
+            return res.status(404).json({
+                msg: 'No existe un doctor con el id ingresado'
+            });
+        }
 
+        await Doctor.findByIdAndDelete( id );
+        res.json({ msg: 'doctor Eliminado' })
+        
+    } catch (error) {
+        console.log( error );res.status(500).json({
+            msg: 'Error Inesperado... Revisar logs'
+        });
+    }
 }
 
 module.exports = {
